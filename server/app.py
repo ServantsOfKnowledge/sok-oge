@@ -545,7 +545,11 @@ class GazetteIndexer:
         return notifications
 
     def _build_summary(self, records: list[dict[str, Any]]) -> dict[str, Any]:
-        indexed_states = sorted({record["state_name"] for record in records})
+        state_record_counts = {state: 0 for state in INDIA_STATE_OPTIONS}
+        for record in records:
+            state_name = record["state_name"]
+            state_record_counts[state_name] = state_record_counts.get(state_name, 0) + 1
+        indexed_states = sorted(state for state, count in state_record_counts.items() if count > 0)
         publications = sorted({record["publication_slug"] for record in records})
         return {
             "record_count": len(records),
@@ -553,6 +557,7 @@ class GazetteIndexer:
             "indexed_state_count": len(indexed_states),
             "states": list(INDIA_STATE_OPTIONS),
             "indexed_states": indexed_states,
+            "state_record_counts": state_record_counts,
             "publications": publications,
         }
 
@@ -625,10 +630,14 @@ def render_select_options(values: list[str]) -> str:
     return "".join(parts)
 
 
-def render_state_chips(states: list[str]) -> str:
+def render_state_chips(states: list[str], state_record_counts: dict[str, int]) -> str:
     parts = ['<button class="chip active" onclick="setStateFilter(\'\')">All states</button>']
     parts.extend(
-        f"<button class=\"chip\" onclick='setStateFilter({json.dumps(value)})'>{html_escape(value)}</button>"
+        (
+            f"<button class=\"chip\" onclick='setStateFilter({json.dumps(value)})'>"
+            f"{html_escape(value)} <span>{int(state_record_counts.get(value, 0)):,}</span>"
+            f"</button>"
+        )
         for value in states
     )
     return "".join(parts)
@@ -658,7 +667,7 @@ def index() -> str:
     state_count = f"{int(summary['state_count']):,}"
     state_options_html = render_select_options(summary["states"])
     publication_options_html = render_select_options(summary["publications"])
-    state_chips_html = render_state_chips(summary["states"])
+    state_chips_html = render_state_chips(summary["states"], summary["state_record_counts"])
     initial_status_line = html_escape(status_message(status))
     initial_summary_json = json.dumps(summary, ensure_ascii=False)
     initial_status_json = json.dumps(status, ensure_ascii=False)
@@ -819,11 +828,21 @@ def index() -> str:
       color: var(--ink);
       text-align: left;
       cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font: inherit;
     }
     .chip.active {
       background: var(--accent-soft);
       border-color: rgba(13, 107, 95, 0.3);
       color: #0c4d45;
+    }
+    .chip span {
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
     }
     .results {
       padding: 18px;
@@ -1075,9 +1094,11 @@ def index() -> str:
       const wrap = document.getElementById("stateChips");
       const selected = document.getElementById("state").value;
       const buttons = ['<button class="chip ' + (selected === "" ? 'active' : '') + '" onclick="setStateFilter(\'\')">All states</button>'];
+      const counts = state.summary?.state_record_counts || {};
       for (const value of (state.summary?.states || [])) {
         const active = selected === value ? "active" : "";
-        buttons.push(`<button class="chip ${active}" onclick="setStateFilter(${JSON.stringify(value)})">${escapeHtml(value)}</button>`);
+        const count = Number(counts[value] || 0).toLocaleString();
+        buttons.push(`<button class="chip ${active}" onclick='setStateFilter(${JSON.stringify(value)})'>${escapeHtml(value)} <span>${count}</span></button>`);
       }
       wrap.innerHTML = buttons.join("");
     }
@@ -1168,15 +1189,6 @@ def index() -> str:
       }).join("");
     }
 
-    async function loadSummary() {
-      state.summary = await fetchJson("/api/summary");
-      document.getElementById("recordCount").textContent = state.summary.record_count.toLocaleString();
-      document.getElementById("stateCount").textContent = state.summary.state_count.toLocaleString();
-      renderSelect("state", state.summary.states);
-      renderSelect("publication", state.summary.publications);
-      renderStateChips();
-    }
-
     async function loadStatus() {
       state.status = await fetchJson("/api/index-status");
       updateIndexStatus();
@@ -1185,9 +1197,6 @@ def index() -> str:
           if (state.refreshInFlight) return;
           state.refreshInFlight = true;
           try {
-            state.status = await fetchJson("/api/index-status");
-            updateIndexStatus();
-            await loadSummary();
             await loadResults();
             if (!state.status.is_building) {
               window.clearInterval(state.pollTimer);
@@ -1196,7 +1205,7 @@ def index() -> str:
           } finally {
             state.refreshInFlight = false;
           }
-        }, 5000);
+        }, 3000);
       }
     }
 
@@ -1236,7 +1245,6 @@ def index() -> str:
     renderStateChips();
 
     loadStatus()
-      .then(loadSummary)
       .then(loadResults)
       .catch(err => {
         document.getElementById("resultsMeta").textContent = err.message;
