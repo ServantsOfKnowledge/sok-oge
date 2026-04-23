@@ -631,10 +631,10 @@ def render_select_options(values: list[str]) -> str:
 
 
 def render_state_chips(states: list[str], state_record_counts: dict[str, int]) -> str:
-    parts = ['<button class="chip active" onclick="setStateFilter(\'\')">All states</button>']
+    parts = ['<button type="button" class="chip active" onclick="setStateFilter(\'\')">All states</button>']
     parts.extend(
         (
-            f"<button class=\"chip\" onclick='setStateFilter({json.dumps(value)})'>"
+            f"<button type=\"button\" class=\"chip\" onclick='setStateFilter({json.dumps(value)})'>"
             f"{html_escape(value)} <span>{int(state_record_counts.get(value, 0)):,}</span>"
             f"</button>"
         )
@@ -1093,12 +1093,12 @@ def index() -> str:
     function renderStateChips() {
       const wrap = document.getElementById("stateChips");
       const selected = document.getElementById("state").value;
-      const buttons = ['<button class="chip ' + (selected === "" ? 'active' : '') + '" onclick="setStateFilter(\'\')">All states</button>'];
+      const buttons = [`<button type="button" class="chip ${selected === "" ? "active" : ""}" onclick='setStateFilter("")'>All states</button>`];
       const counts = state.summary?.state_record_counts || {};
       for (const value of (state.summary?.states || [])) {
         const active = selected === value ? "active" : "";
         const count = Number(counts[value] || 0).toLocaleString();
-        buttons.push(`<button class="chip ${active}" onclick='setStateFilter(${JSON.stringify(value)})'>${escapeHtml(value)} <span>${count}</span></button>`);
+        buttons.push(`<button type="button" class="chip ${active}" onclick='setStateFilter(${JSON.stringify(value)})'>${escapeHtml(value)} <span>${count}</span></button>`);
       }
       wrap.innerHTML = buttons.join("");
     }
@@ -1138,7 +1138,6 @@ def index() -> str:
         ["Subject", record.metadata.subject],
         ["Notification No.", record.metadata.notification_num],
         ["Part", record.metadata.partnum],
-        ["Original Source", record.source_url],
       ];
       return preferred.filter(([, value]) => value);
     }
@@ -1157,6 +1156,12 @@ def index() -> str:
         const metaHtml = metaEntries(record).map(([label, value]) => `
           <div><strong>${escapeHtml(label)}</strong>${escapeHtml(value)}</div>
         `).join("");
+        const sourceMetaHtml = record.source_url ? `
+          <div>
+            <strong>Original Source</strong>
+            <a href="${escapeHtml(record.source_url)}" target="_blank" rel="noreferrer">Open source</a>
+          </div>
+        ` : "";
 
         const notifications = (record.notifications || []).map(item => {
           const bits = Object.entries(item).map(([key, value]) => `${key.replaceAll('_', ' ')}: ${value}`);
@@ -1182,7 +1187,7 @@ def index() -> str:
               ${record.raw_url ? `<a href="${escapeHtml(record.raw_url)}" target="_blank" rel="noreferrer">Open raw file</a>` : ""}
               ${record.source_url ? `<a href="${escapeHtml(record.source_url)}" target="_blank" rel="noreferrer">Open source site</a>` : ""}
             </div>
-            ${metaHtml ? `<div class="meta-grid">${metaHtml}</div>` : ""}
+            ${(metaHtml || sourceMetaHtml) ? `<div class="meta-grid">${metaHtml}${sourceMetaHtml}</div>` : ""}
             ${notifications ? `<div class="notifications">${notifications}</div>` : ""}
           </article>
         `;
