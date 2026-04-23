@@ -8,6 +8,7 @@ from functools import lru_cache
 from html.parser import HTMLParser
 from pathlib import Path
 from typing import Any, Optional
+from urllib.error import HTTPError, URLError
 from urllib.parse import urljoin
 from urllib.request import Request, urlopen
 import xml.etree.ElementTree as ET
@@ -181,15 +182,20 @@ class RemoteGazetteSource(GazetteSource):
     def __init__(self, base_url: str) -> None:
         self.base_url = base_url.rstrip("/") + "/"
 
-    def _fetch(self, relative_path: str) -> str:
+    def _fetch(self, relative_path: str, missing_ok: bool = False) -> str:
         url = self.public_url(relative_path)
         request = Request(url, headers={"User-Agent": USER_AGENT})
-        with urlopen(request, timeout=30) as response:
-            return response.read().decode("utf-8", "ignore")
+        try:
+            with urlopen(request, timeout=30) as response:
+                return response.read().decode("utf-8", "ignore")
+        except HTTPError as exc:
+            if missing_ok and exc.code == 404:
+                return ""
+            raise
 
     def _listing_links(self, relative_path: str) -> list[str]:
         parser = DirectoryListingParser()
-        parser.feed(self._fetch(relative_path))
+        parser.feed(self._fetch(relative_path, missing_ok=True))
         return parser.links
 
     def list_dirs(self, relative_path: str) -> list[str]:
@@ -442,7 +448,10 @@ class GazetteIndexer:
             if not meta_file.lower().endswith(".xml"):
                 continue
             relative_meta = f"{meta_dir}/{meta_file}"
-            xml_text = self.source.read_text(relative_meta)
+            try:
+                xml_text = self.source.read_text(relative_meta)
+            except (FileNotFoundError, HTTPError):
+                continue
             records.append(self._record_from_xml(publication_slug, date_dir, meta_file, raw_by_stem, xml_text))
 
         return records
