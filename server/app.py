@@ -1026,6 +1026,7 @@ def index() -> str:
       limit: 100,
       status: window.__INITIAL_STATUS__,
       pollTimer: null,
+      refreshInFlight: false,
     };
 
     function escapeHtml(value) {
@@ -1181,13 +1182,19 @@ def index() -> str:
       updateIndexStatus();
       if (state.status.is_building && !state.pollTimer) {
         state.pollTimer = window.setInterval(async () => {
-          state.status = await fetchJson("/api/index-status");
-          updateIndexStatus();
-          if (!state.status.is_building) {
-            window.clearInterval(state.pollTimer);
-            state.pollTimer = null;
-            loadSummary();
-            loadResults();
+          if (state.refreshInFlight) return;
+          state.refreshInFlight = true;
+          try {
+            state.status = await fetchJson("/api/index-status");
+            updateIndexStatus();
+            await loadSummary();
+            await loadResults();
+            if (!state.status.is_building) {
+              window.clearInterval(state.pollTimer);
+              state.pollTimer = null;
+            }
+          } finally {
+            state.refreshInFlight = false;
           }
         }, 5000);
       }
