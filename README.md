@@ -1,4 +1,4 @@
-# Gazette Wrapper
+# Official Gazette Explorer
 
 This app is a searchable wrapper for the `gzdl` repository layout used at [gazettes.servantsofknowledge.in/gzdl](https://gazettes.servantsofknowledge.in/gzdl/).
 
@@ -7,15 +7,24 @@ It merges:
 - `metatags/<publication>/<date>/*.xml`
 - `raw/<publication>/<date>/*`
 
-Each result combines XML metadata, publication/state information, notification details, and the matching raw gazette file link.
+Each result combines XML metadata, publication/state information, notification details, and direct links to the matching XML and raw gazette files.
 
 ## Features
 
-- Search across XML-derived metadata such as department, subject, gazette number, notification number, and source URL.
+- Search across XML-derived metadata such as department, subject, gazette number, notification number, and other extracted fields.
 - Filter by state, publication stream, and date range.
-- Handle state-specific publication folders such as `andhra`, `andhra_extraordinary`, `andhra_weekly`, `uttarpradesh_ordinary`, and similar variants.
-- Open the original XML file, raw file, and upstream source URL from one result card.
-- Build the search index in the background so the app can start serving immediately from cached or partial results.
+- Pre-populate the state filter with Indian states and union territories.
+- Show per-state indexed record counts in the left sidebar.
+- Render direct links for:
+  - XML file
+  - PDF or raw file
+  - original source URL
+- Show breadcrumb-style context on every result card for easier scanning.
+- Paginate results at 25 items per page.
+- Keep visible totals and result cards updating while background indexing continues.
+- Build the search index in the background so the app can serve immediately from cached or partial results.
+- Retry transient network/SSL fetch failures and skip malformed XML instead of pausing the whole indexer.
+- Parallelize indexing across publication folders and date folders for faster crawling.
 - Work either against:
   - a local mirrored `gzdl` directory, or
   - the live public directory listing over HTTP.
@@ -25,24 +34,30 @@ Each result combines XML metadata, publication/state information, notification d
 - On startup, the app begins indexing in the background.
 - If a cache already exists, search uses that cached data immediately while new folders are indexed incrementally.
 - Partial progress is saved to the cache, so restarts can resume instead of starting over.
+- Malformed XML files are skipped automatically.
+- Missing folders/files and transient SSL/network fetch failures are handled gracefully instead of stopping the crawl.
+- Parallel indexing uses a worker pool to discover publication folders and process date folders concurrently.
 - Use `GET /api/index-status` to inspect progress.
-- `POST /api/reindex` now triggers a background rebuild instead of blocking the request.
+- `POST /api/reindex` triggers a background rebuild instead of blocking the request.
 
 ## Requirements
 
-- Python `3.10+`
+- Python `3.9+`
 
 ## Run
 
 ```bash
-cd /Users/omshivaprakash/Documents/New\ project
+cd /Users/omshivaprakash/Documents/sok-oge
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-uvicorn server.app:app --host 0.0.0.0 --port 8000 --reload
+python3 -m uvicorn server.app:app --host 0.0.0.0 --port 8008
 ```
 
-Open [http://127.0.0.1:8000](http://127.0.0.1:8000).
+Common URLs:
+
+- Local: [http://127.0.0.1:8008](http://127.0.0.1:8008)
+- LAN: `http://192.168.68.101:8008`
 
 ## Configuration
 
@@ -72,14 +87,15 @@ export GZDL_PUBLIC_BASE_URL=https://gazettes.servantsofknowledge.in/gzdl/
 - `GZDL_BASE_URL`: upstream base URL for remote indexing
 - `GZDL_PUBLIC_BASE_URL`: base URL used when generating XML/raw links in the UI
 - `GZDL_CACHE_PATH`: JSON cache path for the built index
+- `GZDL_INDEX_WORKERS`: number of parallel indexing workers. Default: `8`
 
 ## API
 
-- `GET /api/summary`: dataset counts, states, and publications
+- `GET /api/summary`: dataset counts, states, per-state record counts, and publications
 - `GET /api/index-status`: current background indexing progress
-- `GET /api/search?q=&state=&publication=&date_from=&date_to=&limit=100`
-- `POST /api/reindex`: rebuild the search index and refresh the cache
-- `GET /health`: runtime source configuration
+- `GET /api/search?q=&state=&publication=&date_from=&date_to=&limit=25&page=1`
+- `POST /api/reindex`: trigger a background rebuild
+- `GET /health`: runtime source configuration and index status
 
 ## Deployment Notes
 

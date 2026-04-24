@@ -342,7 +342,17 @@ class GazetteIndexer:
         metatag_publications = self.source.list_dirs("metatags")
         raw_publications = set(self.source.list_dirs("raw"))
         publications = sorted(set(metatag_publications) | raw_publications)
-        publication_dates = {publication_slug: self.source.list_dirs(f"metatags/{publication_slug}") for publication_slug in publications}
+        publication_dates: dict[str, list[str]] = {}
+        if publications:
+            with ThreadPoolExecutor(max_workers=max(1, self.config.index_workers)) as executor:
+                future_map = {
+                    executor.submit(self._safe_list_dates_for_publication, publication_slug): publication_slug
+                    for publication_slug in publications
+                }
+                for future in as_completed(future_map):
+                    publication_slug = future_map[future]
+                    publication_dates[publication_slug] = future.result()
+        publication_dates = {publication_slug: publication_dates.get(publication_slug, []) for publication_slug in publications}
         total_dates = sum(len(date_dirs) for date_dirs in publication_dates.values())
         publication_total_counts = {publication_slug: len(date_dirs) for publication_slug, date_dirs in publication_dates.items()}
         publication_completed_counts = {
@@ -478,6 +488,12 @@ class GazetteIndexer:
     def _safe_records_for_date(self, publication_slug: str, date_dir: str) -> list[dict[str, Any]]:
         try:
             return self._records_for_date(publication_slug, date_dir)
+        except Exception:
+            return []
+
+    def _safe_list_dates_for_publication(self, publication_slug: str) -> list[str]:
+        try:
+            return self.source.list_dirs(f"metatags/{publication_slug}")
         except Exception:
             return []
 
