@@ -37,6 +37,7 @@ Each result combines XML metadata, publication/state information, notification d
 - Malformed XML files are skipped automatically.
 - Missing folders/files and transient SSL/network fetch failures are handled gracefully instead of stopping the crawl.
 - Parallel indexing uses a worker pool to discover publication folders and process date folders concurrently.
+- Date-folder scheduling is interleaved across publication/state folders so more states start appearing earlier instead of one large state dominating the queue.
 - Use `GET /api/index-status` to inspect progress.
 - `POST /api/reindex` triggers a background rebuild instead of blocking the request.
 

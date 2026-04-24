@@ -374,12 +374,7 @@ class GazetteIndexer:
             self._progress["updated_at"] = self._now_iso()
             self._persist_locked()
 
-        pending_tasks = [
-            (publication_slug, date_dir)
-            for publication_slug, date_dirs in publication_dates.items()
-            for date_dir in date_dirs
-            if self._date_key(publication_slug, date_dir) not in self._completed_dates
-        ]
+        pending_tasks = self._build_interleaved_pending_tasks(publication_dates)
 
         if pending_tasks:
             with ThreadPoolExecutor(max_workers=max(1, self.config.index_workers)) as executor:
@@ -496,6 +491,29 @@ class GazetteIndexer:
             return self.source.list_dirs(f"metatags/{publication_slug}")
         except Exception:
             return []
+
+    def _build_interleaved_pending_tasks(
+        self, publication_dates: dict[str, list[str]]
+    ) -> list[tuple[str, str]]:
+        pending_by_publication: dict[str, list[str]] = {}
+        for publication_slug, date_dirs in publication_dates.items():
+            pending_dates = [
+                date_dir
+                for date_dir in date_dirs
+                if self._date_key(publication_slug, date_dir) not in self._completed_dates
+            ]
+            if pending_dates:
+                pending_by_publication[publication_slug] = pending_dates
+
+        tasks: list[tuple[str, str]] = []
+        publication_slugs = list(pending_by_publication.keys())
+        max_len = max((len(dates) for dates in pending_by_publication.values()), default=0)
+        for idx in range(max_len):
+            for publication_slug in publication_slugs:
+                dates = pending_by_publication[publication_slug]
+                if idx < len(dates):
+                    tasks.append((publication_slug, dates[idx]))
+        return tasks
 
     def _records_for_date(self, publication_slug: str, date_dir: str) -> list[dict[str, Any]]:
         meta_dir = f"metatags/{publication_slug}/{date_dir}"
