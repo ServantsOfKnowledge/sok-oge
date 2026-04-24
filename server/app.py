@@ -1,7 +1,9 @@
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import json
 import os
 import re
 import threading
+import time
 from dataclasses import dataclass
 from datetime import date, datetime, timezone
 from functools import lru_cache
@@ -19,6 +21,7 @@ from fastapi.responses import HTMLResponse
 BASE_DIR = Path(__file__).resolve().parent
 DEFAULT_BASE_URL = "https://gazettes.servantsofknowledge.in/gzdl/"
 DEFAULT_CACHE_PATH = BASE_DIR / "gazette_index_cache.json"
+DEFAULT_INDEX_WORKERS = 8
 USER_AGENT = (
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
     "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0 Safari/537.36"
@@ -135,6 +138,7 @@ class GazetteIndexConfig:
     base_url: str
     public_base_url: str
     cache_path: Path
+    index_workers: int
 
 
 class GazetteSource:
@@ -185,13 +189,28 @@ class RemoteGazetteSource(GazetteSource):
     def _fetch(self, relative_path: str, missing_ok: bool = False) -> str:
         url = self.public_url(relative_path)
         request = Request(url, headers={"User-Agent": USER_AGENT})
-        try:
-            with urlopen(request, timeout=30) as response:
-                return response.read().decode("utf-8", "ignore")
-        except HTTPError as exc:
-            if missing_ok and exc.code == 404:
-                return ""
-            raise
+        last_error: Optional[Exception] = None
+        for attempt in range(4):
+            try:
+                with urlopen(request, timeout=30) as response:
+                    return response.read().decode("utf-8", "ignore")
+            except HTTPError as exc:
+                if missing_ok and exc.code == 404:
+                    return ""
+                raise
+            except (URLError, OSError) as exc:
+                last_error = exc
+                if attempt < 3:
+                    time.sleep(0.6 * (attempt + 1))
+                    continue
+                if missing_ok:
+                    return ""
+                raise
+        if missing_ok:
+            return ""
+        if last_error is not None:
+            raise last_error
+        return ""
 
     def _listing_links(self, relative_path: str) -> list[str]:
         parser = DirectoryListingParser()
@@ -325,42 +344,60 @@ class GazetteIndexer:
         publications = sorted(set(metatag_publications) | raw_publications)
         publication_dates = {publication_slug: self.source.list_dirs(f"metatags/{publication_slug}") for publication_slug in publications}
         total_dates = sum(len(date_dirs) for date_dirs in publication_dates.values())
+        publication_total_counts = {publication_slug: len(date_dirs) for publication_slug, date_dirs in publication_dates.items()}
+        publication_completed_counts = {
+            publication_slug: sum(
+                1 for date_dir in date_dirs if self._date_key(publication_slug, date_dir) in self._completed_dates
+            )
+            for publication_slug, date_dirs in publication_dates.items()
+        }
 
         with self._lock:
             self._progress["publications_total"] = len(publications)
             self._progress["dates_total"] = total_dates
             self._progress["dates_done"] = min(len(self._completed_dates), total_dates)
+            self._progress["publications_done"] = sum(
+                1
+                for publication_slug, total_count in publication_total_counts.items()
+                if publication_completed_counts.get(publication_slug, 0) >= total_count
+            )
             self._progress["updated_at"] = self._now_iso()
             self._persist_locked()
 
-        for publication_index, publication_slug in enumerate(publications, start=1):
-            publication_records: list[dict[str, Any]] = []
-            new_dates: list[str] = []
-            for date_dir in publication_dates[publication_slug]:
-                date_key = self._date_key(publication_slug, date_dir)
-                if date_key in self._completed_dates:
-                    continue
-                publication_records.extend(self._records_for_date(publication_slug, date_dir))
-                new_dates.append(date_key)
-                with self._lock:
-                    self._index.extend(publication_records)
-                    publication_records.clear()
-                    self._completed_dates.update(new_dates)
-                    new_dates.clear()
-                    self._summary = self._build_summary(self._index)
-                    self._progress["dates_done"] = len(self._completed_dates)
-                    self._progress["updated_at"] = self._now_iso()
-                    self._persist_locked()
+        pending_tasks = [
+            (publication_slug, date_dir)
+            for publication_slug, date_dirs in publication_dates.items()
+            for date_dir in date_dirs
+            if self._date_key(publication_slug, date_dir) not in self._completed_dates
+        ]
 
-            with self._lock:
-                self._index.sort(
-                    key=lambda item: (item["gazette_date"] or "", item["publication_slug"], item["file_stem"]),
-                    reverse=True,
-                )
-                self._summary = self._build_summary(self._index)
-                self._progress["publications_done"] = publication_index
-                self._progress["updated_at"] = self._now_iso()
-                self._persist_locked()
+        if pending_tasks:
+            with ThreadPoolExecutor(max_workers=max(1, self.config.index_workers)) as executor:
+                future_map = {
+                    executor.submit(self._safe_records_for_date, publication_slug, date_dir): (publication_slug, date_dir)
+                    for publication_slug, date_dir in pending_tasks
+                }
+                for future in as_completed(future_map):
+                    publication_slug, date_dir = future_map[future]
+                    date_key = self._date_key(publication_slug, date_dir)
+                    records = future.result()
+                    with self._lock:
+                        self._index.extend(records)
+                        self._completed_dates.add(date_key)
+                        publication_completed_counts[publication_slug] = publication_completed_counts.get(publication_slug, 0) + 1
+                        self._index.sort(
+                            key=lambda item: (item["gazette_date"] or "", item["publication_slug"], item["file_stem"]),
+                            reverse=True,
+                        )
+                        self._summary = self._build_summary(self._index)
+                        self._progress["dates_done"] = len(self._completed_dates)
+                        self._progress["publications_done"] = sum(
+                            1
+                            for slug, total_count in publication_total_counts.items()
+                            if publication_completed_counts.get(slug, 0) >= total_count
+                        )
+                        self._progress["updated_at"] = self._now_iso()
+                        self._persist_locked()
 
         with self._lock:
             self._summary = self._build_summary(self._index)
@@ -432,10 +469,17 @@ class GazetteIndexer:
             "dates_total": self._progress["dates_total"],
             "dates_done": self._progress["dates_done"],
             "cached_records": len(self._index),
+            "index_workers": self.config.index_workers,
         }
         if include_completed_dates:
             payload["completed_dates"] = sorted(self._completed_dates)
         return payload
+
+    def _safe_records_for_date(self, publication_slug: str, date_dir: str) -> list[dict[str, Any]]:
+        try:
+            return self._records_for_date(publication_slug, date_dir)
+        except Exception:
+            return []
 
     def _records_for_date(self, publication_slug: str, date_dir: str) -> list[dict[str, Any]]:
         meta_dir = f"metatags/{publication_slug}/{date_dir}"
@@ -450,9 +494,11 @@ class GazetteIndexer:
             relative_meta = f"{meta_dir}/{meta_file}"
             try:
                 xml_text = self.source.read_text(relative_meta)
-            except (FileNotFoundError, HTTPError):
+            except (FileNotFoundError, HTTPError, URLError, OSError):
                 continue
-            records.append(self._record_from_xml(publication_slug, date_dir, meta_file, raw_by_stem, xml_text))
+            record = self._record_from_xml(publication_slug, date_dir, meta_file, raw_by_stem, xml_text)
+            if record is not None:
+                records.append(record)
 
         return records
 
@@ -463,11 +509,11 @@ class GazetteIndexer:
         meta_file: str,
         raw_by_stem: dict[str, str],
         xml_text: str,
-    ) -> dict[str, Any]:
+    ) -> Optional[dict[str, Any]]:
         try:
             root = ET.fromstring(xml_text)
-        except ET.ParseError as exc:
-            raise RuntimeError(f"Failed to parse XML for {publication_slug}/{date_dir}/{meta_file}") from exc
+        except ET.ParseError:
+            return None
 
         state_slug, publication_kind = publication_parts(publication_slug)
         state_name = humanize_slug(state_slug)
@@ -569,6 +615,7 @@ def get_indexer() -> GazetteIndexer:
         base_url=os.getenv("GZDL_BASE_URL", DEFAULT_BASE_URL),
         public_base_url=os.getenv("GZDL_PUBLIC_BASE_URL", DEFAULT_BASE_URL),
         cache_path=Path(os.getenv("GZDL_CACHE_PATH", str(DEFAULT_CACHE_PATH))).expanduser().resolve(),
+        index_workers=max(1, int(os.getenv("GZDL_INDEX_WORKERS", str(DEFAULT_INDEX_WORKERS)))),
     )
     return GazetteIndexer(config)
 
@@ -859,6 +906,17 @@ def index() -> str:
       color: var(--muted);
       font-size: 14px;
     }
+    .pager {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+    .pager-info {
+      color: var(--muted);
+      font-size: 14px;
+    }
     .cards {
       display: grid;
       gap: 14px;
@@ -883,6 +941,24 @@ def index() -> str:
       letter-spacing: 0.08em;
       font-size: 11px;
       font-weight: 700;
+    }
+    .breadcrumb {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+    .breadcrumb span::after {
+      content: "/";
+      margin-left: 6px;
+      color: #b7aa92;
+    }
+    .breadcrumb span:last-child::after {
+      content: "";
+      margin: 0;
     }
     .card h3 {
       margin: 5px 0 0;
@@ -1028,6 +1104,7 @@ def index() -> str:
           <div>
             <h2>Results</h2>
             <div id="resultsMeta" class="results-meta">Loading results...</div>
+            <div id="pager" class="pager"></div>
           </div>
         </div>
         <div id="cards" class="cards"></div>
@@ -1042,7 +1119,8 @@ def index() -> str:
     const state = {
       summary: window.__INITIAL_SUMMARY__,
       results: [],
-      limit: 100,
+      limit: 25,
+      page: 1,
       status: window.__INITIAL_STATUS__,
       pollTimer: null,
       refreshInFlight: false,
@@ -1078,6 +1156,7 @@ def index() -> str:
         if (value) params.set(key, value);
       }
       params.set("limit", String(state.limit));
+      params.set("page", String(state.page));
       return params;
     }
 
@@ -1121,6 +1200,7 @@ def index() -> str:
 
     function setStateFilter(value) {
       document.getElementById("state").value = value;
+      state.page = 1;
       renderStateChips();
       loadResults();
     }
@@ -1142,10 +1222,29 @@ def index() -> str:
       return preferred.filter(([, value]) => value);
     }
 
+    function rawLinkLabel(record) {
+      const name = String(record.raw_file || "").toLowerCase();
+      if (name.endsWith(".pdf")) return "Open PDF";
+      return "Open file";
+    }
+
+    function breadcrumbParts(record) {
+      const parts = [
+        record.state_name,
+        record.publication_title,
+        record.gazette_date || "Undated",
+      ];
+      if (record.raw_file) {
+        parts.push(record.raw_file);
+      } else if (record.meta_file) {
+        parts.push(record.meta_file);
+      }
+      return parts.filter(Boolean);
+    }
+
     function renderCards() {
       const cards = document.getElementById("cards");
       const results = state.results;
-      document.getElementById("visibleCount").textContent = results.length;
 
       if (!results.length) {
         cards.innerHTML = '<div class="empty">No gazettes matched these filters. Try a broader state selection or a simpler metadata search.</div>';
@@ -1167,24 +1266,26 @@ def index() -> str:
           const bits = Object.entries(item).map(([key, value]) => `${key.replaceAll('_', ' ')}: ${value}`);
           return `<div class="notification">${escapeHtml(bits.join(" | "))}</div>`;
         }).join("");
+        const breadcrumbHtml = breadcrumbParts(record).map(part => `<span>${escapeHtml(part)}</span>`).join("");
 
         return `
           <article class="card">
             <div class="card-top">
               <div>
-                <div class="eyebrow">${escapeHtml(record.state_name)} • ${escapeHtml(record.publication_kind)}</div>
+                <div class="eyebrow">${escapeHtml(record.publication_kind)}</div>
+                <div class="breadcrumb">${breadcrumbHtml}</div>
                 <h3>${escapeHtml(record.gazette_date || "Undated")} · ${escapeHtml(record.publication_title)}</h3>
               </div>
               <div class="pill-row">
-                <span class="pill">${escapeHtml(record.publication_slug)}</span>
-                <span class="pill">${escapeHtml(record.meta_file)}</span>
-                ${record.raw_file ? `<span class="pill">${escapeHtml(record.raw_file)}</span>` : ""}
+                <a class="pill" href="${escapeHtml(record.meta_url)}" target="_blank" rel="noreferrer">${escapeHtml(record.publication_slug)}</a>
+                <a class="pill" href="${escapeHtml(record.meta_url)}" target="_blank" rel="noreferrer">${escapeHtml(record.meta_file)}</a>
+                ${record.raw_file && record.raw_url ? `<a class="pill" href="${escapeHtml(record.raw_url)}" target="_blank" rel="noreferrer">${escapeHtml(record.raw_file)}</a>` : ""}
               </div>
             </div>
             <p>${escapeHtml(summarizeCard(record))}</p>
             <div class="link-row">
-              <a href="${escapeHtml(record.meta_url)}" target="_blank" rel="noreferrer">Open XML</a>
-              ${record.raw_url ? `<a href="${escapeHtml(record.raw_url)}" target="_blank" rel="noreferrer">Open raw file</a>` : ""}
+              <a href="${escapeHtml(record.meta_url)}" target="_blank" rel="noreferrer">XML file</a>
+              ${record.raw_url ? `<a href="${escapeHtml(record.raw_url)}" target="_blank" rel="noreferrer">${escapeHtml(rawLinkLabel(record))}</a>` : ""}
               ${record.source_url ? `<a href="${escapeHtml(record.source_url)}" target="_blank" rel="noreferrer">Open source site</a>` : ""}
             </div>
             ${(metaHtml || sourceMetaHtml) ? `<div class="meta-grid">${metaHtml}${sourceMetaHtml}</div>` : ""}
@@ -1192,6 +1293,23 @@ def index() -> str:
           </article>
         `;
       }).join("");
+    }
+
+    function renderPager(total, limit, page) {
+      const pager = document.getElementById("pager");
+      const totalPages = Math.max(1, Math.ceil(total / limit));
+      const start = total ? ((page - 1) * limit) + 1 : 0;
+      const end = Math.min(page * limit, total);
+      pager.innerHTML = `
+        <button type="button" class="secondary" ${page <= 1 ? "disabled" : ""} onclick="goToPage(${page - 1})">Previous</button>
+        <div class="pager-info">Showing ${start.toLocaleString()}-${end.toLocaleString()} of ${total.toLocaleString()} · Page ${page.toLocaleString()} of ${totalPages.toLocaleString()}</div>
+        <button type="button" class="secondary" ${page >= totalPages ? "disabled" : ""} onclick="goToPage(${page + 1})">Next</button>
+      `;
+    }
+
+    function goToPage(page) {
+      state.page = Math.max(1, page);
+      loadResults();
     }
 
     async function loadStatus() {
@@ -1218,9 +1336,11 @@ def index() -> str:
       const params = paramsFromForm();
       const payload = await fetchJson(`/api/search?${params.toString()}`);
       state.results = payload.results;
+      state.page = payload.page;
+      document.getElementById("visibleCount").textContent = payload.total.toLocaleString();
       document.getElementById("resultsMeta").textContent =
         `${payload.total.toLocaleString()} result(s)` +
-        (payload.truncated ? ` shown, limited to ${payload.limit}` : "") +
+        `, ${payload.limit.toLocaleString()} per page` +
         ". Each record merges XML metadata with the matching raw gazette file when available." +
         (payload.index_status?.is_building ? " Background indexing is still in progress." : "");
       if (payload.summary) {
@@ -1233,10 +1353,12 @@ def index() -> str:
       state.status = payload.index_status || state.status;
       updateIndexStatus();
       renderStateChips();
+      renderPager(payload.total, payload.limit, payload.page);
       renderCards();
     }
 
     function resetFilters() {
+      state.page = 1;
       document.getElementById("q").value = "";
       document.getElementById("state").value = "";
       document.getElementById("publication").value = "";
@@ -1287,16 +1409,19 @@ def search(
     publication: str = Query(default=""),
     date_from: str = Query(default=""),
     date_to: str = Query(default=""),
-    limit: int = Query(default=100, ge=1, le=1000),
+    limit: int = Query(default=25, ge=1, le=100),
+    page: int = Query(default=1, ge=1),
 ) -> dict[str, Any]:
     indexer = get_indexer()
     records = indexer.get_index()
     matches = search_records(records, q=q, state=state, publication=publication, date_from=date_from, date_to=date_to)
-    sliced = matches[:limit]
+    offset = (page - 1) * limit
+    sliced = matches[offset: offset + limit]
     return {
         "total": len(matches),
         "limit": limit,
-        "truncated": len(matches) > limit,
+        "page": page,
+        "truncated": len(matches) > (offset + limit),
         "summary": indexer.get_summary(),
         "index_status": indexer.get_status(),
         "results": [serialize_record(item) for item in sliced],
