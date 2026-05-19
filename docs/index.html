@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Official Gazette Explorer</title>
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <div class="page-shell">
+      <aside class="sidebar">
+        <div class="brand-block">
+          <p class="eyebrow">Servants of Knowledge</p>
+          <h1>Official Gazette Explorer</h1>
+          <p class="lede">
+            Search indexed gazette metadata from the completed archive export. The GitHub Pages edition loads
+            publication data on demand, so state-scoped browsing stays fast while the full archive remains available.
+          </p>
+        </div>
+
+        <div class="stat-grid">
+          <article class="stat-card">
+            <span class="stat-label">Indexed records</span>
+            <strong id="record-count">0</strong>
+          </article>
+          <article class="stat-card">
+            <span class="stat-label">Indexed states</span>
+            <strong id="state-count">0</strong>
+          </article>
+          <article class="stat-card">
+            <span class="stat-label">Publications</span>
+            <strong id="publication-count">0</strong>
+          </article>
+        </div>
+
+        <section class="sidebar-section">
+          <div class="section-head">
+            <h2>States</h2>
+            <button id="clear-state" class="ghost-button" type="button">Clear</button>
+          </div>
+          <div id="state-list" class="state-list"></div>
+        </section>
+      </aside>
+
+      <main class="main-panel">
+        <section class="controls-card">
+          <div class="controls-grid">
+            <label>
+              <span>Search text</span>
+              <input id="query-input" type="search" placeholder="Department, subject, gazette number, notification number">
+            </label>
+            <label>
+              <span>State</span>
+              <select id="state-select"></select>
+            </label>
+            <label>
+              <span>Publication</span>
+              <select id="publication-select"></select>
+            </label>
+            <label>
+              <span>From date</span>
+              <input id="date-from-input" type="date">
+            </label>
+            <label>
+              <span>To date</span>
+              <input id="date-to-input" type="date">
+            </label>
+          </div>
+
+          <div class="action-row">
+            <button id="search-button" class="primary-button" type="button">Search archive</button>
+            <button id="reset-button" class="ghost-button" type="button">Reset</button>
+            <button id="latest-button" class="ghost-button" type="button">Show latest</button>
+          </div>
+
+          <p class="hint">
+            Tip: state or publication filters load much faster. Global search across all publications still works, but it
+            may take longer because the GitHub Pages version fetches shards directly in the browser.
+          </p>
+        </section>
+
+        <section class="status-bar">
+          <div>
+            <strong id="result-summary">Loading summary…</strong>
+            <p id="status-message" class="status-message">Preparing the archive view.</p>
+          </div>
+          <div class="pager">
+            <button id="prev-page" class="ghost-button" type="button">Previous</button>
+            <span id="page-label">Page 1</span>
+            <button id="next-page" class="ghost-button" type="button">Next</button>
+          </div>
+        </section>
+
+        <section id="results" class="results-grid"></section>
+      </main>
+    </div>
+
+    <template id="result-template">
+      <article class="result-card">
+        <p class="breadcrumb"></p>
+        <div class="card-head">
+          <h3 class="result-title"></h3>
+          <span class="date-pill"></span>
+        </div>
+        <div class="file-links"></div>
+        <dl class="meta-grid"></dl>
+        <div class="notification-wrap"></div>
+      </article>
+    </template>
+
+    <script src="./app.js" type="module"></script>
+  </body>
+  </html>

@@ -1,0 +1,742 @@
+{
+  "title": "Official Gazette Explorer",
+  "description": "Static GitHub Pages edition of the Official Gazette Explorer. It serves publication shards generated from the completed metadata index.",
+  "generated_at": "2026-05-19T07:59:09.620133+00:00",
+  "record_count": 360845,
+  "state_count": 36,
+  "indexed_state_count": 38,
+  "states": [
+    "Andaman and Nicobar Islands",
+    "Andhra Pradesh",
+    "Arunachal Pradesh",
+    "Assam",
+    "Bihar",
+    "Chandigarh",
+    "Chhattisgarh",
+    "Dadra and Nagar Haveli and Daman and Diu",
+    "Delhi",
+    "Goa",
+    "Gujarat",
+    "Haryana",
+    "Himachal Pradesh",
+    "Jammu and Kashmir",
+    "Jharkhand",
+    "Karnataka",
+    "Kerala",
+    "Ladakh",
+    "Lakshadweep",
+    "Madhya Pradesh",
+    "Maharashtra",
+    "Manipur",
+    "Meghalaya",
+    "Mizoram",
+    "Nagaland",
+    "Odisha",
+    "Puducherry",
+    "Punjab",
+    "Rajasthan",
+    "Sikkim",
+    "Tamil Nadu",
+    "Telangana",
+    "Tripura",
+    "Uttar Pradesh",
+    "Uttarakhand",
+    "West Bengal"
+  ],
+  "indexed_states": [
+    "Andhra Pradesh",
+    "Assam",
+    "Bihar",
+    "Central",
+    "Central Secretariat Library",
+    "Cgextraordinary",
+    "Cgweekly",
+    "Chandigarh",
+    "Dadra and Nagar Haveli and Daman and Diu",
+    "Delhi",
+    "Goa",
+    "Gujarat",
+    "Haryana",
+    "Himachal Pradesh",
+    "Jammu and Kashmir",
+    "Jharkhand",
+    "Karnataka",
+    "Kerala",
+    "Kerala Compose",
+    "Ladakh",
+    "Lakshadweep",
+    "Madhya Pradesh",
+    "Maharashtra",
+    "Manipur",
+    "Meghalaya",
+    "Mizoram",
+    "Odisha",
+    "Puducherry",
+    "Punjab",
+    "Punjab DSA",
+    "Sikkim",
+    "Tamil Nadu",
+    "Telangana",
+    "Tripura",
+    "Uttar Pradesh",
+    "Uttarakhand",
+    "West Bengal",
+    "West Bengal State Library"
+  ],
+  "state_record_counts": {
+    "Andaman and Nicobar Islands": 0,
+    "Andhra Pradesh": 16513,
+    "Arunachal Pradesh": 0,
+    "Assam": 6258,
+    "Bihar": 19568,
+    "Chandigarh": 1043,
+    "Chhattisgarh": 0,
+    "Dadra and Nagar Haveli and Daman and Diu": 265,
+    "Delhi": 3645,
+    "Goa": 3510,
+    "Gujarat": 5565,
+    "Haryana": 8580,
+    "Himachal Pradesh": 1528,
+    "Jammu and Kashmir": 600,
+    "Jharkhand": 6650,
+    "Karnataka": 18224,
+    "Kerala": 33509,
+    "Ladakh": 582,
+    "Lakshadweep": 369,
+    "Madhya Pradesh": 5427,
+    "Maharashtra": 10615,
+    "Manipur": 2569,
+    "Meghalaya": 3785,
+    "Mizoram": 9092,
+    "Nagaland": 0,
+    "Odisha": 11378,
+    "Puducherry": 5229,
+    "Punjab": 1503,
+    "Rajasthan": 0,
+    "Sikkim": 42,
+    "Tamil Nadu": 6081,
+    "Telangana": 4015,
+    "Tripura": 695,
+    "Uttar Pradesh": 3465,
+    "Uttarakhand": 719,
+    "West Bengal": 189,
+    "Punjab DSA": 9696,
+    "Kerala Compose": 19796,
+    "Central": 66544,
+    "Cgweekly": 2095,
+    "Cgextraordinary": 6150,
+    "Central Secretariat Library": 65323,
+    "West Bengal State Library": 28
+  },
+  "publications": [
+    {
+      "slug": "andhra",
+      "title": "Andhra Pradesh Standard",
+      "state_name": "Andhra Pradesh",
+      "count": 14226,
+      "earliest_date": "2018-03-01",
+      "latest_date": "2023-05-10",
+      "path": "./data/publications/andhra.json.gz"
+    },
+    {
+      "slug": "andhra_extraordinary",
+      "title": "Andhra Pradesh Extraordinary",
+      "state_name": "Andhra Pradesh",
+      "count": 1439,
+      "earliest_date": "2025-01-01",
+      "latest_date": "2026-03-02",
+      "path": "./data/publications/andhra_extraordinary.json.gz"
+    },
+    {
+      "slug": "andhra_weekly",
+      "title": "Andhra Pradesh Weekly",
+      "state_name": "Andhra Pradesh",
+      "count": 848,
+      "earliest_date": "2025-01-01",
+      "latest_date": "2026-02-27",
+      "path": "./data/publications/andhra_weekly.json.gz"
+    },
+    {
+      "slug": "assam_extraordinary",
+      "title": "Assam Extraordinary",
+      "state_name": "Assam",
+      "count": 5788,
+      "earliest_date": "2016-03-30",
+      "latest_date": "2026-01-17",
+      "path": "./data/publications/assam_extraordinary.json.gz"
+    },
+    {
+      "slug": "assam_weekly",
+      "title": "Assam Weekly",
+      "state_name": "Assam",
+      "count": 470,
+      "earliest_date": "2017-01-04",
+      "latest_date": "2026-01-14",
+      "path": "./data/publications/assam_weekly.json.gz"
+    },
+    {
+      "slug": "bihar",
+      "title": "Bihar Standard",
+      "state_name": "Bihar",
+      "count": 19568,
+      "earliest_date": "2008-09-24",
+      "latest_date": "2026-03-02",
+      "path": "./data/publications/bihar.json.gz"
+    },
+    {
+      "slug": "central_extraordinary",
+      "title": "Central Extraordinary",
+      "state_name": "Central",
+      "count": 62905,
+      "earliest_date": "2018-03-01",
+      "latest_date": "2026-03-03",
+      "path": "./data/publications/central_extraordinary.json.gz"
+    },
+    {
+      "slug": "central_weekly",
+      "title": "Central Weekly",
+      "state_name": "Central",
+      "count": 3639,
+      "earliest_date": "2018-03-03",
+      "latest_date": "2026-02-28",
+      "path": "./data/publications/central_weekly.json.gz"
+    },
+    {
+      "slug": "cgextraordinary",
+      "title": "Cgextraordinary Standard",
+      "state_name": "Cgextraordinary",
+      "count": 6150,
+      "earliest_date": "2018-03-05",
+      "latest_date": "2026-02-27",
+      "path": "./data/publications/cgextraordinary.json.gz"
+    },
+    {
+      "slug": "cgweekly",
+      "title": "Cgweekly Standard",
+      "state_name": "Cgweekly",
+      "count": 2095,
+      "earliest_date": "2018-03-02",
+      "latest_date": "2026-02-27",
+      "path": "./data/publications/cgweekly.json.gz"
+    },
+    {
+      "slug": "chandigarh",
+      "title": "Chandigarh Standard",
+      "state_name": "Chandigarh",
+      "count": 1043,
+      "earliest_date": "2019-10-15",
+      "latest_date": "2026-01-22",
+      "path": "./data/publications/chandigarh.json.gz"
+    },
+    {
+      "slug": "csl_extraordinary",
+      "title": "Central Secretariat Library Extraordinary",
+      "state_name": "Central Secretariat Library",
+      "count": 51466,
+      "earliest_date": "1929-02-28",
+      "latest_date": "2001-12-03",
+      "path": "./data/publications/csl_extraordinary.json.gz"
+    },
+    {
+      "slug": "csl_weekly",
+      "title": "Central Secretariat Library Weekly",
+      "state_name": "Central Secretariat Library",
+      "count": 13857,
+      "earliest_date": "1922-01-28",
+      "latest_date": "1997-12-29",
+      "path": "./data/publications/csl_weekly.json.gz"
+    },
+    {
+      "slug": "dadranagarhaveli",
+      "title": "Dadra and Nagar Haveli and Daman and Diu Standard",
+      "state_name": "Dadra and Nagar Haveli and Daman and Diu",
+      "count": 265,
+      "earliest_date": "2021-05-18",
+      "latest_date": "2026-02-20",
+      "path": "./data/publications/dadranagarhaveli.json.gz"
+    },
+    {
+      "slug": "delhi_extraordinary",
+      "title": "Delhi Extraordinary",
+      "state_name": "Delhi",
+      "count": 3375,
+      "earliest_date": "2018-03-03",
+      "latest_date": "2026-03-02",
+      "path": "./data/publications/delhi_extraordinary.json.gz"
+    },
+    {
+      "slug": "delhi_weekly",
+      "title": "Delhi Weekly",
+      "state_name": "Delhi",
+      "count": 270,
+      "earliest_date": "2018-04-05",
+      "latest_date": "2026-02-12",
+      "path": "./data/publications/delhi_weekly.json.gz"
+    },
+    {
+      "slug": "goa",
+      "title": "Goa Standard",
+      "state_name": "Goa",
+      "count": 3510,
+      "earliest_date": "1962-01-25",
+      "latest_date": "2026-02-27",
+      "path": "./data/publications/goa.json.gz"
+    },
+    {
+      "slug": "gujarat",
+      "title": "Gujarat Standard",
+      "state_name": "Gujarat",
+      "count": 5565,
+      "earliest_date": "1991",
+      "latest_date": "2026-03-02",
+      "path": "./data/publications/gujarat.json.gz"
+    },
+    {
+      "slug": "haryana",
+      "title": "Haryana Standard",
+      "state_name": "Haryana",
+      "count": 8580,
+      "earliest_date": "2018-03-01",
+      "latest_date": "2024-02-29",
+      "path": "./data/publications/haryana.json.gz"
+    },
+    {
+      "slug": "himachal",
+      "title": "Himachal Pradesh Standard",
+      "state_name": "Himachal Pradesh",
+      "count": 1528,
+      "earliest_date": "2010-01-01",
+      "latest_date": "2015-09-07",
+      "path": "./data/publications/himachal.json.gz"
+    },
+    {
+      "slug": "jammuandkashmir",
+      "title": "Jammu and Kashmir Standard",
+      "state_name": "Jammu and Kashmir",
+      "count": 600,
+      "earliest_date": "2014-04-03",
+      "latest_date": "2026-02-26",
+      "path": "./data/publications/jammuandkashmir.json.gz"
+    },
+    {
+      "slug": "jharkhand",
+      "title": "Jharkhand Standard",
+      "state_name": "Jharkhand",
+      "count": 6650,
+      "earliest_date": "2018-03-05",
+      "latest_date": "2026-02-27",
+      "path": "./data/publications/jharkhand.json.gz"
+    },
+    {
+      "slug": "karnataka",
+      "title": "Karnataka Standard",
+      "state_name": "Karnataka",
+      "count": 3890,
+      "earliest_date": "2009-06-11",
+      "latest_date": "2019-12-26",
+      "path": "./data/publications/karnataka.json.gz"
+    },
+    {
+      "slug": "karnataka_daily",
+      "title": "Karnataka Daily",
+      "state_name": "Karnataka",
+      "count": 8672,
+      "earliest_date": "2020-01-01",
+      "latest_date": "2025-11-21",
+      "path": "./data/publications/karnataka_daily.json.gz"
+    },
+    {
+      "slug": "karnataka_extraordinary",
+      "title": "Karnataka Extraordinary",
+      "state_name": "Karnataka",
+      "count": 5466,
+      "earliest_date": "2020-01-01",
+      "latest_date": "2026-02-27",
+      "path": "./data/publications/karnataka_extraordinary.json.gz"
+    },
+    {
+      "slug": "karnataka_weekly",
+      "title": "Karnataka Weekly",
+      "state_name": "Karnataka",
+      "count": 196,
+      "earliest_date": "2020-01-09",
+      "latest_date": "2021-02-01",
+      "path": "./data/publications/karnataka_weekly.json.gz"
+    },
+    {
+      "slug": "kerala",
+      "title": "Kerala Standard",
+      "state_name": "Kerala",
+      "count": 33509,
+      "earliest_date": "2007-05-22",
+      "latest_date": "2022-02-22",
+      "path": "./data/publications/kerala.json.gz"
+    },
+    {
+      "slug": "keralacompose",
+      "title": "Kerala Compose Standard",
+      "state_name": "Kerala Compose",
+      "count": 19796,
+      "earliest_date": "2023-12-11",
+      "latest_date": "2026-03-03",
+      "path": "./data/publications/keralacompose.json.gz"
+    },
+    {
+      "slug": "ladakh",
+      "title": "Ladakh Standard",
+      "state_name": "Ladakh",
+      "count": 582,
+      "earliest_date": "2020-09-19",
+      "latest_date": "2026-01-19",
+      "path": "./data/publications/ladakh.json.gz"
+    },
+    {
+      "slug": "lakshadweep",
+      "title": "Lakshadweep Standard",
+      "state_name": "Lakshadweep",
+      "count": 369,
+      "earliest_date": "2016-03-04",
+      "latest_date": "2026-02-05",
+      "path": "./data/publications/lakshadweep.json.gz"
+    },
+    {
+      "slug": "madhyapradesh",
+      "title": "Madhya Pradesh Standard",
+      "state_name": "Madhya Pradesh",
+      "count": 5427,
+      "earliest_date": "2010-01-01",
+      "latest_date": "2023-02-09",
+      "path": "./data/publications/madhyapradesh.json.gz"
+    },
+    {
+      "slug": "maharashtra",
+      "title": "Maharashtra Standard",
+      "state_name": "Maharashtra",
+      "count": 10615,
+      "earliest_date": "2018-03-01",
+      "latest_date": "2024-05-24",
+      "path": "./data/publications/maharashtra.json.gz"
+    },
+    {
+      "slug": "manipur",
+      "title": "Manipur Standard",
+      "state_name": "Manipur",
+      "count": 2569,
+      "earliest_date": "2010-04-01",
+      "latest_date": "2025-11-21",
+      "path": "./data/publications/manipur.json.gz"
+    },
+    {
+      "slug": "meghalaya",
+      "title": "Meghalaya Standard",
+      "state_name": "Meghalaya",
+      "count": 3785,
+      "earliest_date": "2006-03-02",
+      "latest_date": "2019-06-12",
+      "path": "./data/publications/meghalaya.json.gz"
+    },
+    {
+      "slug": "mizoram",
+      "title": "Mizoram Standard",
+      "state_name": "Mizoram",
+      "count": 9092,
+      "earliest_date": "1972",
+      "latest_date": "2024",
+      "path": "./data/publications/mizoram.json.gz"
+    },
+    {
+      "slug": "odisha",
+      "title": "Odisha Standard",
+      "state_name": "Odisha",
+      "count": 1388,
+      "earliest_date": "2018-03-03",
+      "latest_date": "2020-09-07",
+      "path": "./data/publications/odisha.json.gz"
+    },
+    {
+      "slug": "odisha_egaz",
+      "title": "Odisha Egaz",
+      "state_name": "Odisha",
+      "count": 8416,
+      "earliest_date": "2022-01-01",
+      "latest_date": "2026-01-23",
+      "path": "./data/publications/odisha_egaz.json.gz"
+    },
+    {
+      "slug": "odisha_govpress",
+      "title": "Odisha Govpress",
+      "state_name": "Odisha",
+      "count": 1574,
+      "earliest_date": "2023-01-09",
+      "latest_date": "2025-07-31",
+      "path": "./data/publications/odisha_govpress.json.gz"
+    },
+    {
+      "slug": "puducherry",
+      "title": "Puducherry Standard",
+      "state_name": "Puducherry",
+      "count": 5229,
+      "earliest_date": "2011-02-01",
+      "latest_date": "2024-01-02",
+      "path": "./data/publications/puducherry.json.gz"
+    },
+    {
+      "slug": "punjab",
+      "title": "Punjab Standard",
+      "state_name": "Punjab",
+      "count": 1503,
+      "earliest_date": "2018-03-01",
+      "latest_date": "2020-04-09",
+      "path": "./data/publications/punjab.json.gz"
+    },
+    {
+      "slug": "punjabdsa",
+      "title": "Punjab DSA Standard",
+      "state_name": "Punjab DSA",
+      "count": 9696,
+      "earliest_date": "2020-02-07",
+      "latest_date": "2026-03-03",
+      "path": "./data/publications/punjabdsa.json.gz"
+    },
+    {
+      "slug": "sikkim",
+      "title": "Sikkim Standard",
+      "state_name": "Sikkim",
+      "count": 42,
+      "earliest_date": "1975-09-08",
+      "latest_date": "1984-03-29",
+      "path": "./data/publications/sikkim.json.gz"
+    },
+    {
+      "slug": "tamilnadu",
+      "title": "Tamil Nadu Standard",
+      "state_name": "Tamil Nadu",
+      "count": 6081,
+      "earliest_date": "2018-03-01",
+      "latest_date": "2024-10-02",
+      "path": "./data/publications/tamilnadu.json.gz"
+    },
+    {
+      "slug": "telangana",
+      "title": "Telangana Standard",
+      "state_name": "Telangana",
+      "count": 4015,
+      "earliest_date": "2018-03-02",
+      "latest_date": "2025-06-26",
+      "path": "./data/publications/telangana.json.gz"
+    },
+    {
+      "slug": "tripura_extraordinary",
+      "title": "Tripura Extraordinary",
+      "state_name": "Tripura",
+      "count": 688,
+      "earliest_date": "2025-08-30",
+      "latest_date": "2026-01-07",
+      "path": "./data/publications/tripura_extraordinary.json.gz"
+    },
+    {
+      "slug": "tripura_ordinary",
+      "title": "Tripura Ordinary",
+      "state_name": "Tripura",
+      "count": 7,
+      "earliest_date": "2025-10-14",
+      "latest_date": "2025-12-03",
+      "path": "./data/publications/tripura_ordinary.json.gz"
+    },
+    {
+      "slug": "uttarakhand",
+      "title": "Uttarakhand Standard",
+      "state_name": "Uttarakhand",
+      "count": 351,
+      "earliest_date": "2018-01-06",
+      "latest_date": "2024-06-01",
+      "path": "./data/publications/uttarakhand.json.gz"
+    },
+    {
+      "slug": "uttarakhand_daily",
+      "title": "Uttarakhand Daily",
+      "state_name": "Uttarakhand",
+      "count": 272,
+      "earliest_date": "2024-03-13",
+      "latest_date": "2025-12-23",
+      "path": "./data/publications/uttarakhand_daily.json.gz"
+    },
+    {
+      "slug": "uttarakhand_weekly",
+      "title": "Uttarakhand Weekly",
+      "state_name": "Uttarakhand",
+      "count": 96,
+      "earliest_date": "2024-01-08",
+      "latest_date": "2025-12-16",
+      "path": "./data/publications/uttarakhand_weekly.json.gz"
+    },
+    {
+      "slug": "uttarpradesh_extraordinary",
+      "title": "Uttar Pradesh Extraordinary",
+      "state_name": "Uttar Pradesh",
+      "count": 3202,
+      "earliest_date": "2018-12-21",
+      "latest_date": "2026-02-05",
+      "path": "./data/publications/uttarpradesh_extraordinary.json.gz"
+    },
+    {
+      "slug": "uttarpradesh_ordinary",
+      "title": "Uttar Pradesh Ordinary",
+      "state_name": "Uttar Pradesh",
+      "count": 263,
+      "earliest_date": "2020-06-06",
+      "latest_date": "2026-02-21",
+      "path": "./data/publications/uttarpradesh_ordinary.json.gz"
+    },
+    {
+      "slug": "wbsl",
+      "title": "West Bengal State Library Standard",
+      "state_name": "West Bengal State Library",
+      "count": 28,
+      "earliest_date": "1817",
+      "latest_date": "1988",
+      "path": "./data/publications/wbsl.json.gz"
+    },
+    {
+      "slug": "westbengal",
+      "title": "West Bengal Standard",
+      "state_name": "West Bengal",
+      "count": 189,
+      "earliest_date": "1833",
+      "latest_date": "2001",
+      "path": "./data/publications/westbengal.json.gz"
+    }
+  ],
+  "publication_count": 53,
+  "state_publications": {
+    "Andhra Pradesh": [
+      "andhra",
+      "andhra_extraordinary",
+      "andhra_weekly"
+    ],
+    "Assam": [
+      "assam_extraordinary",
+      "assam_weekly"
+    ],
+    "Bihar": [
+      "bihar"
+    ],
+    "Central": [
+      "central_extraordinary",
+      "central_weekly"
+    ],
+    "Central Secretariat Library": [
+      "csl_extraordinary",
+      "csl_weekly"
+    ],
+    "Cgextraordinary": [
+      "cgextraordinary"
+    ],
+    "Cgweekly": [
+      "cgweekly"
+    ],
+    "Chandigarh": [
+      "chandigarh"
+    ],
+    "Dadra and Nagar Haveli and Daman and Diu": [
+      "dadranagarhaveli"
+    ],
+    "Delhi": [
+      "delhi_extraordinary",
+      "delhi_weekly"
+    ],
+    "Goa": [
+      "goa"
+    ],
+    "Gujarat": [
+      "gujarat"
+    ],
+    "Haryana": [
+      "haryana"
+    ],
+    "Himachal Pradesh": [
+      "himachal"
+    ],
+    "Jammu and Kashmir": [
+      "jammuandkashmir"
+    ],
+    "Jharkhand": [
+      "jharkhand"
+    ],
+    "Karnataka": [
+      "karnataka",
+      "karnataka_daily",
+      "karnataka_extraordinary",
+      "karnataka_weekly"
+    ],
+    "Kerala": [
+      "kerala"
+    ],
+    "Kerala Compose": [
+      "keralacompose"
+    ],
+    "Ladakh": [
+      "ladakh"
+    ],
+    "Lakshadweep": [
+      "lakshadweep"
+    ],
+    "Madhya Pradesh": [
+      "madhyapradesh"
+    ],
+    "Maharashtra": [
+      "maharashtra"
+    ],
+    "Manipur": [
+      "manipur"
+    ],
+    "Meghalaya": [
+      "meghalaya"
+    ],
+    "Mizoram": [
+      "mizoram"
+    ],
+    "Odisha": [
+      "odisha",
+      "odisha_egaz",
+      "odisha_govpress"
+    ],
+    "Puducherry": [
+      "puducherry"
+    ],
+    "Punjab": [
+      "punjab"
+    ],
+    "Punjab DSA": [
+      "punjabdsa"
+    ],
+    "Sikkim": [
+      "sikkim"
+    ],
+    "Tamil Nadu": [
+      "tamilnadu"
+    ],
+    "Telangana": [
+      "telangana"
+    ],
+    "Tripura": [
+      "tripura_extraordinary",
+      "tripura_ordinary"
+    ],
+    "Uttar Pradesh": [
+      "uttarpradesh_extraordinary",
+      "uttarpradesh_ordinary"
+    ],
+    "Uttarakhand": [
+      "uttarakhand",
+      "uttarakhand_daily",
+      "uttarakhand_weekly"
+    ],
+    "West Bengal": [
+      "westbengal"
+    ],
+    "West Bengal State Library": [
+      "wbsl"
+    ]
+  }
+}

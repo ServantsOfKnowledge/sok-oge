@@ -25,6 +25,7 @@ Each result combines XML metadata, publication/state information, notification d
 - Build the search index in the background so the app can serve immediately from cached or partial results.
 - Retry transient network/SSL fetch failures and skip malformed XML instead of pausing the whole indexer.
 - Parallelize indexing across publication folders and date folders for faster crawling.
+- Publish a static GitHub Pages edition from the completed cache using publication-sharded metadata files.
 - Work either against:
   - a local mirrored `gzdl` directory, or
   - the live public directory listing over HTTP.
@@ -98,6 +99,42 @@ export GZDL_PUBLIC_BASE_URL=https://gazettes.servantsofknowledge.in/gzdl/
 - `POST /api/reindex`: trigger a background rebuild
 - `GET /health`: runtime source configuration and index status
 
+## GitHub Pages Export
+
+Once the metadata cache is complete, you can publish a static version of the portal from the `docs/` folder.
+
+Generate the Pages payload:
+
+```bash
+cd /Users/omshivaprakash/Documents/sok-oge
+python3 scripts/export_github_pages.py
+```
+
+This writes:
+
+- `docs/index.html`
+- `docs/app.js`
+- `docs/styles.css`
+- `docs/data/summary.json`
+- `docs/data/latest.json.gz`
+- `docs/data/publications/*.json.gz`
+
+Notes:
+
+- The exporter reads `server/gazette_index_cache.json` and strips the internal `search_blob` field before publishing.
+- Metadata is sharded by publication and written as gzip-compressed JSON so each published file stays comfortably within GitHub's single-file size limit.
+- The Pages edition can search the full archive, but state-scoped and publication-scoped searches are faster because the browser only loads the needed shards.
+- The default landing view shows the latest preloaded records immediately, then deeper archive searches load additional publication shards on demand.
+
+To serve it locally for a quick check:
+
+```bash
+cd /Users/omshivaprakash/Documents/sok-oge
+python3 -m http.server 8011 -d docs
+```
+
+Then open [http://127.0.0.1:8011](http://127.0.0.1:8011).
+
 ## Deployment Notes
 
 For `repo.servantsofknowledge.in`, the cleanest setup is:
@@ -107,3 +144,5 @@ For `repo.servantsofknowledge.in`, the cleanest setup is:
 3. Set `GZDL_LOCAL_ROOT` to the mirror path and `GZDL_PUBLIC_BASE_URL` to `https://repo.servantsofknowledge.in/gzdl/`.
 
 That way the search index is built locally, while result links still open the hosted XML and raw files on the public domain.
+
+For GitHub Pages, configure the repository to publish from the `docs/` folder on `main`.
