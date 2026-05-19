@@ -122,15 +122,15 @@ function setStatus(message) {
 
 function setSummary(summary) {
   elements.recordCount.textContent = numberFormat(summary.record_count);
-  elements.stateCount.textContent = numberFormat(summary.indexed_state_count || summary.state_count);
+  elements.stateCount.textContent = numberFormat(summary.state_count);
   elements.publicationCount.textContent = numberFormat(summary.publication_count);
 }
 
 function renderStateList() {
   const activeState = elements.stateSelect.value;
-  const indexedStates = state.summary.indexed_states || [];
+  const states = state.summary.states || [];
   const counts = state.summary.state_record_counts || {};
-  elements.stateList.innerHTML = indexedStates
+  elements.stateList.innerHTML = states
     .map((stateName) => {
       const count = counts[stateName] || 0;
       const activeClass = activeState === stateName ? " active" : "";
@@ -430,8 +430,8 @@ async function init() {
 
   setSummary(summary);
   elements.stateSelect.innerHTML = [
-    '<option value="">All indexed states</option>',
-    ...(summary.indexed_states || []).map((stateName) => `<option value="${escapeHtml(stateName)}">${escapeHtml(stateName)}</option>`),
+    '<option value="">All states</option>',
+    ...(summary.states || []).map((stateName) => `<option value="${escapeHtml(stateName)}">${escapeHtml(stateName)}</option>`),
   ].join("");
   renderPublicationOptions();
   renderStateList();

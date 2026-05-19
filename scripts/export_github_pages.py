@@ -44,6 +44,9 @@ def publication_payload(record: dict[str, Any]) -> dict[str, Any]:
 
 def compact_summary(cache: dict[str, Any], manifest: list[dict[str, Any]]) -> dict[str, Any]:
     summary = cache.get("summary") or {}
+    states = summary.get("states", [])
+    state_record_counts = summary.get("state_record_counts", {})
+    indexed_states = [state for state in states if int(state_record_counts.get(state, 0)) > 0]
     return {
         "title": "Official Gazette Explorer",
         "description": (
@@ -53,10 +56,10 @@ def compact_summary(cache: dict[str, Any], manifest: list[dict[str, Any]]) -> di
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "record_count": summary.get("record_count", 0),
         "state_count": summary.get("state_count", 0),
-        "indexed_state_count": summary.get("indexed_state_count", 0),
-        "states": summary.get("states", []),
-        "indexed_states": summary.get("indexed_states", []),
-        "state_record_counts": summary.get("state_record_counts", {}),
+        "indexed_state_count": len(indexed_states),
+        "states": states,
+        "indexed_states": indexed_states,
+        "state_record_counts": {state: int(state_record_counts.get(state, 0)) for state in states},
         "publications": manifest,
         "publication_count": len(manifest),
     }
@@ -115,9 +118,14 @@ def build_export() -> None:
         )
 
     summary_payload = compact_summary(cache, manifest)
+    official_states = set(summary_payload["states"])
     summary_payload["state_publications"] = {
-        state_name: sorted(publications) for state_name, publications in sorted(state_to_publications.items())
+        state_name: sorted(state_to_publications.get(state_name, set()))
+        for state_name in summary_payload["states"]
     }
+    summary_payload["unofficial_state_labels"] = sorted(
+        state_name for state_name in state_to_publications.keys() if state_name not in official_states
+    )
 
     (DATA_DIR / "summary.json").write_text(
         json.dumps(summary_payload, ensure_ascii=False, indent=2),

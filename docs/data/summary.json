@@ -1,10 +1,10 @@
 {
   "title": "Official Gazette Explorer",
   "description": "Static GitHub Pages edition of the Official Gazette Explorer. It serves publication shards generated from the completed metadata index.",
-  "generated_at": "2026-05-19T07:59:09.620133+00:00",
+  "generated_at": "2026-05-19T17:21:28.388253+00:00",
   "record_count": 360845,
   "state_count": 36,
-  "indexed_state_count": 38,
+  "indexed_state_count": 31,
   "states": [
     "Andaman and Nicobar Islands",
     "Andhra Pradesh",
@@ -47,10 +47,6 @@
     "Andhra Pradesh",
     "Assam",
     "Bihar",
-    "Central",
-    "Central Secretariat Library",
-    "Cgextraordinary",
-    "Cgweekly",
     "Chandigarh",
     "Dadra and Nagar Haveli and Daman and Diu",
     "Delhi",
@@ -62,7 +58,6 @@
     "Jharkhand",
     "Karnataka",
     "Kerala",
-    "Kerala Compose",
     "Ladakh",
     "Lakshadweep",
     "Madhya Pradesh",
@@ -73,15 +68,13 @@
     "Odisha",
     "Puducherry",
     "Punjab",
-    "Punjab DSA",
     "Sikkim",
     "Tamil Nadu",
     "Telangana",
     "Tripura",
     "Uttar Pradesh",
     "Uttarakhand",
-    "West Bengal",
-    "West Bengal State Library"
+    "West Bengal"
   ],
   "state_record_counts": {
     "Andaman and Nicobar Islands": 0,
@@ -119,14 +112,7 @@
     "Tripura": 695,
     "Uttar Pradesh": 3465,
     "Uttarakhand": 719,
-    "West Bengal": 189,
-    "Punjab DSA": 9696,
-    "Kerala Compose": 19796,
-    "Central": 66544,
-    "Cgweekly": 2095,
-    "Cgextraordinary": 6150,
-    "Central Secretariat Library": 65323,
-    "West Bengal State Library": 28
+    "West Bengal": 189
   },
   "publications": [
     {
@@ -609,11 +595,13 @@
   ],
   "publication_count": 53,
   "state_publications": {
+    "Andaman and Nicobar Islands": [],
     "Andhra Pradesh": [
       "andhra",
       "andhra_extraordinary",
       "andhra_weekly"
     ],
+    "Arunachal Pradesh": [],
     "Assam": [
       "assam_extraordinary",
       "assam_weekly"
@@ -621,23 +609,10 @@
     "Bihar": [
       "bihar"
     ],
-    "Central": [
-      "central_extraordinary",
-      "central_weekly"
-    ],
-    "Central Secretariat Library": [
-      "csl_extraordinary",
-      "csl_weekly"
-    ],
-    "Cgextraordinary": [
-      "cgextraordinary"
-    ],
-    "Cgweekly": [
-      "cgweekly"
-    ],
     "Chandigarh": [
       "chandigarh"
     ],
+    "Chhattisgarh": [],
     "Dadra and Nagar Haveli and Daman and Diu": [
       "dadranagarhaveli"
     ],
@@ -672,9 +647,6 @@
     "Kerala": [
       "kerala"
     ],
-    "Kerala Compose": [
-      "keralacompose"
-    ],
     "Ladakh": [
       "ladakh"
     ],
@@ -696,6 +668,7 @@
     "Mizoram": [
       "mizoram"
     ],
+    "Nagaland": [],
     "Odisha": [
       "odisha",
       "odisha_egaz",
@@ -707,9 +680,7 @@
     "Punjab": [
       "punjab"
     ],
-    "Punjab DSA": [
-      "punjabdsa"
-    ],
+    "Rajasthan": [],
     "Sikkim": [
       "sikkim"
     ],
@@ -734,9 +705,15 @@
     ],
     "West Bengal": [
       "westbengal"
-    ],
-    "West Bengal State Library": [
-      "wbsl"
     ]
-  }
+  },
+  "unofficial_state_labels": [
+    "Central",
+    "Central Secretariat Library",
+    "Cgextraordinary",
+    "Cgweekly",
+    "Kerala Compose",
+    "Punjab DSA",
+    "West Bengal State Library"
+  ]
 }
