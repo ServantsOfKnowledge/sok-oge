@@ -51,7 +51,7 @@ Each result combines XML metadata, publication/state information, notification d
 ## Run
 
 ```bash
-cd /Users/omshivaprakash/Documents/sok-oge
+cd /path/to/sok-oge
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
@@ -61,7 +61,7 @@ python3 -m uvicorn server.app:app --host 0.0.0.0 --port 8008
 Common URLs:
 
 - Local: [http://127.0.0.1:8008](http://127.0.0.1:8008)
-- LAN: `http://192.168.68.101:8008`
+- LAN: `http://<your-lan-ip>:8008`
 
 ## Configuration
 
@@ -108,7 +108,7 @@ Once the metadata cache is complete, you can publish a static version of the por
 Generate the Pages payload:
 
 ```bash
-cd /Users/omshivaprakash/Documents/sok-oge
+cd /path/to/sok-oge
 python3 scripts/export_github_pages.py
 ```
 
@@ -143,7 +143,7 @@ Notes:
 To serve it locally for a quick check:
 
 ```bash
-cd /Users/omshivaprakash/Documents/sok-oge
+cd /path/to/sok-oge
 python3 -m http.server 8011 -d docs
 ```
 
