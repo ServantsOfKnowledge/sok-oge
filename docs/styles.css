@@ -13,7 +13,7 @@
   --radius-lg: 22px;
   --radius-md: 16px;
   --radius-sm: 12px;
-  font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
+  font-family: "Noto Serif", "Noto Serif Kannada", "Noto Serif Devanagari", "Noto Serif Tamil", "Noto Serif Telugu", "Noto Serif Malayalam", "Iowan Old Style", serif;
 }
 
 * {
@@ -82,6 +82,17 @@ select {
   margin: 0;
   color: var(--muted);
   line-height: 1.6;
+}
+
+.language-picker {
+  display: grid;
+  gap: 8px;
+  margin-top: 22px;
+}
+
+.language-picker label {
+  color: var(--muted);
+  font-size: 0.92rem;
 }
 
 .stat-grid {
@@ -216,10 +227,7 @@ select {
   line-height: 1.5;
 }
 
-.status-bar {
-  margin-top: 18px;
-}
-
+.status-bar,
 .chat-card {
   margin-top: 18px;
 }
@@ -264,7 +272,6 @@ select {
   gap: 12px;
   margin-top: 16px;
 }
-
 
 .results-grid {
   display: grid;
@@ -376,7 +383,8 @@ select {
   }
 
   .controls-grid,
-  .meta-grid {
+  .meta-grid,
+  .chat-controls {
     grid-template-columns: 1fr;
   }
 

@@ -10,32 +10,44 @@
     <div class="page-shell">
       <aside class="sidebar">
         <div class="brand-block">
-          <p class="eyebrow">Servants of Knowledge</p>
-          <h1>Official Gazette Explorer</h1>
-          <p class="lede">
+          <p class="eyebrow" id="eyebrow-text">Servants of Knowledge</p>
+          <h1 id="title-text">Official Gazette Explorer</h1>
+          <p class="lede" id="lede-text">
             Search indexed gazette metadata from the completed archive export. The GitHub Pages edition loads
             publication data on demand, so state-scoped browsing stays fast while the full archive remains available.
           </p>
         </div>
 
+        <div class="language-picker">
+          <label for="language-select" id="language-label">Interface language</label>
+          <select id="language-select">
+            <option value="en">English</option>
+            <option value="kn">ಕನ್ನಡ</option>
+            <option value="hi">हिन्दी</option>
+            <option value="ta">தமிழ்</option>
+            <option value="te">తెలుగు</option>
+            <option value="ml">മലയാളം</option>
+          </select>
+        </div>
+
         <div class="stat-grid">
           <article class="stat-card">
-            <span class="stat-label">Indexed records</span>
+            <span class="stat-label" id="stat-label-records">Indexed records</span>
             <strong id="record-count">0</strong>
           </article>
           <article class="stat-card">
-            <span class="stat-label">Indexed states</span>
+            <span class="stat-label" id="stat-label-states">States and UTs</span>
             <strong id="state-count">0</strong>
           </article>
           <article class="stat-card">
-            <span class="stat-label">Publications</span>
+            <span class="stat-label" id="stat-label-publications">Publications</span>
             <strong id="publication-count">0</strong>
           </article>
         </div>
 
         <section class="sidebar-section">
           <div class="section-head">
-            <h2>States</h2>
+            <h2 id="states-heading">States</h2>
             <button id="clear-state" class="ghost-button" type="button">Clear</button>
           </div>
           <div id="state-list" class="state-list"></div>
@@ -46,23 +58,23 @@
         <section class="controls-card">
           <div class="controls-grid">
             <label>
-              <span>Search text</span>
+              <span id="query-label">Search text</span>
               <input id="query-input" type="search" placeholder="Department, subject, gazette number, notification number">
             </label>
             <label>
-              <span>State</span>
+              <span id="state-label">State</span>
               <select id="state-select"></select>
             </label>
             <label>
-              <span>Publication</span>
+              <span id="publication-label">Publication</span>
               <select id="publication-select"></select>
             </label>
             <label>
-              <span>From date</span>
+              <span id="date-from-label">From date</span>
               <input id="date-from-input" type="date">
             </label>
             <label>
-              <span>To date</span>
+              <span id="date-to-label">To date</span>
               <input id="date-to-input" type="date">
             </label>
           </div>
@@ -73,7 +85,7 @@
             <button id="latest-button" class="ghost-button" type="button">Show latest</button>
           </div>
 
-          <p class="hint">
+          <p class="hint" id="hint-text">
             Tip: state or publication filters load much faster. Global search across all publications still works, but it
             may take longer because the GitHub Pages version fetches shards directly in the browser.
           </p>
@@ -94,8 +106,8 @@
         <section class="chat-card">
           <div class="section-head">
             <div>
-              <h2>Archive Assistant</h2>
-              <p class="status-message">Ask for help with filters, summaries, or what is visible in the current result set.</p>
+              <h2 id="chat-title">Archive Assistant</h2>
+              <p class="status-message" id="chat-subtitle">Ask for help with filters, summaries, or what is visible in the current result set.</p>
             </div>
             <button id="chat-reset-button" class="ghost-button" type="button">Clear chat</button>
           </div>
@@ -125,4 +137,4 @@
 
     <script src="./app.js" type="module"></script>
   </body>
-  </html>
+</html>
