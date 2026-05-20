@@ -91,6 +91,21 @@
           </div>
         </section>
 
+        <section class="chat-card">
+          <div class="section-head">
+            <div>
+              <h2>Archive Assistant</h2>
+              <p class="status-message">Ask for help with filters, summaries, or what is visible in the current result set.</p>
+            </div>
+            <button id="chat-reset-button" class="ghost-button" type="button">Clear chat</button>
+          </div>
+          <div id="chat-log" class="chat-log" aria-live="polite"></div>
+          <div class="chat-controls">
+            <input id="chat-input" type="text" placeholder="Try: show latest Andhra Pradesh gazettes or summarize current results">
+            <button id="chat-send-button" class="primary-button" type="button">Ask</button>
+          </div>
+        </section>
+
         <section id="results" class="results-grid"></section>
       </main>
     </div>

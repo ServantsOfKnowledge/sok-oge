@@ -32,6 +32,10 @@ const elements = {
   resetButton: document.querySelector("#reset-button"),
   latestButton: document.querySelector("#latest-button"),
   clearStateButton: document.querySelector("#clear-state"),
+  chatLog: document.querySelector("#chat-log"),
+  chatInput: document.querySelector("#chat-input"),
+  chatSendButton: document.querySelector("#chat-send-button"),
+  chatResetButton: document.querySelector("#chat-reset-button"),
   template: document.querySelector("#result-template"),
 };
 
@@ -118,6 +122,125 @@ function sortRecords(records) {
 
 function setStatus(message) {
   elements.statusMessage.textContent = message;
+}
+
+function appendChatMessage(role, text) {
+  const bubble = document.createElement("div");
+  bubble.className = `chat-bubble ${role}`;
+  bubble.textContent = text;
+  elements.chatLog.appendChild(bubble);
+  elements.chatLog.scrollTop = elements.chatLog.scrollHeight;
+}
+
+function clearChat() {
+  elements.chatLog.innerHTML = "";
+  appendChatMessage(
+    "assistant",
+    "I can help you explore the archive. Try asking for a state, a publication, the latest visible results, or a quick summary of what is currently filtered.",
+  );
+}
+
+function summarizeRecords(records) {
+  if (!records.length) {
+    return "There are no matching records right now. Try widening the date range, clearing the state filter, or removing the search text.";
+  }
+
+  const stateCounts = new Map();
+  const publicationCounts = new Map();
+  for (const record of records.slice(0, 200)) {
+    stateCounts.set(record.state_name, (stateCounts.get(record.state_name) || 0) + 1);
+    publicationCounts.set(record.publication_slug, (publicationCounts.get(record.publication_slug) || 0) + 1);
+  }
+
+  const topStates = [...stateCounts.entries()]
+    .sort((left, right) => right[1] - left[1])
+    .slice(0, 3)
+    .map(([name, count]) => `${name} (${count})`)
+    .join(", ");
+  const topPublications = [...publicationCounts.entries()]
+    .sort((left, right) => right[1] - left[1])
+    .slice(0, 3)
+    .map(([name, count]) => `${name} (${count})`)
+    .join(", ");
+
+  return [
+    `There are ${numberFormat(records.length)} matching records in the current archive view.`,
+    topStates ? `Top states in the first visible slice: ${topStates}.` : "",
+    topPublications ? `Top publications in the first visible slice: ${topPublications}.` : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+}
+
+function findStateMention(message) {
+  const lowered = message.toLowerCase();
+  return (state.summary.states || []).find((stateName) => lowered.includes(stateName.toLowerCase())) || "";
+}
+
+function findPublicationMention(message) {
+  const lowered = message.toLowerCase();
+  return (state.summary.publications || []).find(
+    (publication) =>
+      lowered.includes(publication.slug.toLowerCase()) ||
+      lowered.includes((publication.title || "").toLowerCase()),
+  )?.slug || "";
+}
+
+async function answerChat(message) {
+  const lowered = message.toLowerCase();
+  const criteria = currentCriteria();
+
+  if (lowered.includes("reset")) {
+    resetFilters();
+    await executeSearch();
+    return "The filters are cleared, and I switched the page back to the default latest-results view.";
+  }
+
+  const stateMention = findStateMention(message);
+  const publicationMention = findPublicationMention(message);
+  if (stateMention || publicationMention) {
+    if (stateMention) {
+      syncStateFilter(stateMention);
+    }
+    if (publicationMention) {
+      renderPublicationOptions();
+      elements.publicationSelect.value = publicationMention;
+    }
+    await executeSearch();
+    const labels = [stateMention, publicationMention].filter(Boolean).join(" / ");
+    return `I applied the filter for ${labels}. There are now ${numberFormat(state.currentResults.length)} matching records.`;
+  }
+
+  if (lowered.includes("latest")) {
+    resetFilters();
+    await executeSearch();
+    return "I switched back to the latest published gazettes view so you can browse the freshest records first.";
+  }
+
+  if (lowered.includes("summary") || lowered.includes("summarize") || lowered.includes("visible")) {
+    return summarizeRecords(state.currentResults);
+  }
+
+  if (lowered.includes("what can you do") || lowered.includes("help")) {
+    return [
+      "I can help with a few archive tasks:",
+      "- apply a state or publication filter when you name it",
+      "- reset the current search",
+      "- switch back to the latest records view",
+      "- summarize the current result set",
+      `Right now the active filters are state: ${criteria.state || "all"}, publication: ${criteria.publication || "all"}, search text: ${criteria.query || "none"}.`,
+    ].join("\n");
+  }
+
+  return [
+    "I can help you navigate the archive, but I only work with the data already loaded in this static site.",
+    "Try one of these prompts:",
+    "- summarize current results",
+    "- show Andhra Pradesh",
+    "- open andhra_extraordinary",
+    "- reset filters",
+    "- show latest gazettes",
+  ].join("\n");
 }
 
 function setSummary(summary) {
@@ -421,6 +544,29 @@ function attachEvents() {
       executeSearch();
     }
   });
+
+  elements.chatSendButton.addEventListener("click", async () => {
+    const message = elements.chatInput.value.trim();
+    if (!message) {
+      return;
+    }
+    appendChatMessage("user", message);
+    elements.chatInput.value = "";
+    const reply = await answerChat(message);
+    appendChatMessage("assistant", reply);
+  });
+
+  elements.chatInput.addEventListener("keydown", async (event) => {
+    if (event.key !== "Enter") {
+      return;
+    }
+    event.preventDefault();
+    elements.chatSendButton.click();
+  });
+
+  elements.chatResetButton.addEventListener("click", () => {
+    clearChat();
+  });
 }
 
 async function init() {
@@ -436,6 +582,7 @@ async function init() {
   renderPublicationOptions();
   renderStateList();
   attachEvents();
+  clearChat();
   await executeSearch();
 }
 
