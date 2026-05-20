@@ -26,6 +26,8 @@ Each result combines XML metadata, publication/state information, notification d
 - Retry transient network/SSL fetch failures and skip malformed XML instead of pausing the whole indexer.
 - Parallelize indexing across publication folders and date folders for faster crawling.
 - Publish a static GitHub Pages edition from the completed cache using publication-sharded metadata files.
+- Provide a client-side archive assistant in the GitHub Pages edition for filter help, summaries, and metadata lookups.
+- Support a multilingual GitHub Pages interface with English, Kannada, Hindi, Tamil, Telugu, and Malayalam.
 - Work either against:
   - a local mirrored `gzdl` directory, or
   - the live public directory listing over HTTP.
@@ -125,6 +127,18 @@ Notes:
 - Metadata is sharded by publication and written as gzip-compressed JSON so each published file stays comfortably within GitHub's single-file size limit.
 - The Pages edition can search the full archive, but state-scoped and publication-scoped searches are faster because the browser only loads the needed shards.
 - The default landing view shows the latest preloaded records immediately, then deeper archive searches load additional publication shards on demand.
+- The GitHub Pages interface now includes a built-in client-side assistant that can:
+  - summarize the current visible result set
+  - apply state or publication filters from natural-language prompts
+  - search inside loaded archive metadata with prompts such as `find land acquisition in Karnataka`
+- The GitHub Pages interface now includes a language switcher for:
+  - English
+  - Kannada
+  - Hindi
+  - Tamil
+  - Telugu
+  - Malayalam
+- The GitHub Pages state list mirrors the local portal's official state and union territory view rather than exposing archive-only labels such as `Central` or `Punjab DSA` in the visible state filters.
 
 To serve it locally for a quick check:
 
@@ -134,6 +148,18 @@ python3 -m http.server 8011 -d docs
 ```
 
 Then open [http://127.0.0.1:8011](http://127.0.0.1:8011).
+
+### GitHub Pages Usage Notes
+
+- Use the language selector in the left sidebar to switch the interface language.
+- The archive assistant appears below the status bar and above the results list.
+- Example assistant prompts:
+  - `summarize current results`
+  - `show Andhra Pradesh`
+  - `find land acquisition in Karnataka`
+  - `show latest gazettes`
+  - `reset filters`
+- The assistant works entirely on the client side. It does not call an external LLM service; it uses the already-loaded archive metadata and active filters available in the browser.
 
 ## Deployment Notes
 
